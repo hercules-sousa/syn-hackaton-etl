@@ -1,0 +1,20 @@
+{
+  "tagMapping": [
+    {
+      "source": "ROOT",
+      "destiny": "root"
+    },
+    {
+      "source": "ITEMX",
+      "destiny": "itemX"
+    },
+    {
+      "source": "ID",
+      "destiny": "id"
+    },
+    {
+      "source": "NAME",
+      "destiny": "name"
+    }
+  ]
+}
