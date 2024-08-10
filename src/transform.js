@@ -4,21 +4,23 @@ const { DOMParser, XMLSerializer } = require("xmldom");
 
 const config = require("../config.json");
 
-const inputXmlPath = path.join(__dirname, "..", "xml", "exemplo.xml");
-const input = fs.readFileSync(inputXmlPath, "utf8");
+const preffix = "syn_nota_simplificada";
 
+const inputXmlPath = path.join(__dirname, "..", "xml", `${preffix}.xml`);
 const modelXmlPath = path.join(
   __dirname,
   "..",
   "xml",
   "model",
-  "exemplo_modelo.xml"
+  `${preffix}_modelo.xml`
 );
-const model = fs.readFileSync(modelXmlPath, "utf8");
+
+const inputXml = fs.readFileSync(inputXmlPath, "utf8");
+const modelXml = fs.readFileSync(modelXmlPath, "utf8");
 
 const parser = new DOMParser();
-const inputXmlDoc = parser.parseFromString(input, "text/xml");
-const modelXmlDoc = parser.parseFromString(model, "text/xml");
+const inputXmlDoc = parser.parseFromString(inputXml, "text/xml");
+const modelXmlDoc = parser.parseFromString(modelXml, "text/xml");
 
 config.tagMapping.forEach((mapping) => {
   const sourceTags = inputXmlDoc.getElementsByTagName(mapping.source);
@@ -32,13 +34,11 @@ config.tagMapping.forEach((mapping) => {
 const serializer = new XMLSerializer();
 const outputXmlString = serializer.serializeToString(modelXmlDoc);
 
-console.log(outputXmlString);
-
 const destinationPath = path.join(
   __dirname,
   "..",
   "xml",
   "transformed",
-  "processed.xml"
+  `${preffix}_transformada.xml`
 );
 fs.writeFileSync(destinationPath, outputXmlString);

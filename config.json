@@ -1,12 +1,8 @@
 {
   "tagMapping": [
     {
-      "source": "ID",
-      "destination": "id"
-    },
-    {
-      "source": "NAME",
-      "destination": "name"
+      "source": "FISCAL_DOC_KEY",
+      "destination": "SistemaOrigem"
     }
   ]
 }
