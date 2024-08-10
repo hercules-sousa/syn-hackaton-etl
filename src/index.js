@@ -1,92 +1,44 @@
 const fs = require("fs");
-const xml2js = require("xml2js");
 const path = require("path");
+const { DOMParser, XMLSerializer } = require("xmldom");
 
 const config = require("../config.json");
 
-async function extract(filePath) {
-  const parser = new xml2js.Parser();
+const preffix = "syn_nota_simplificada";
 
-  return new Promise((resolve, reject) => {
-    fs.readFile(filePath, (err, data) => {
-      if (err) {
-        reject("An error occurred when reading XML file: " + err);
-        return;
-      }
+const inputXmlPath = path.join(__dirname, "..", "xml", `${preffix}.xml`);
+const modelXmlPath = path.join(
+  __dirname,
+  "..",
+  "xml",
+  "model",
+  `${preffix}_modelo.xml`
+);
 
-      parser.parseString(data, (err, result) => {
-        if (err) {
-          reject("An error occurred when parsing XML file: " + err);
-          return;
-        }
+const inputXml = fs.readFileSync(inputXmlPath, "utf8");
+const modelXml = fs.readFileSync(modelXmlPath, "utf8");
 
-        resolve(result);
-      });
-    });
-  });
-}
+const parser = new DOMParser();
+const inputXmlDoc = parser.parseFromString(inputXml, "text/xml");
+const modelXmlDoc = parser.parseFromString(modelXml, "text/xml");
 
-function replaceTags(obj, sourceTag, destinyTag) {
-  if (typeof obj !== "object" || obj === null) return;
+config.tagMapping.forEach((mapping) => {
+  const sourceTags = inputXmlDoc.getElementsByTagName(mapping.source);
+  const destinationTags = modelXmlDoc.getElementsByTagName(mapping.destination);
 
-  if (Array.isArray(obj)) {
-    obj.forEach((item) => replaceTags(item, sourceTag, destinyTag));
-  } else {
-    if (obj[sourceTag]) {
-      obj[destinyTag] = obj[sourceTag];
-      delete obj[sourceTag];
-    }
-
-    Object.keys(obj).forEach((key) => {
-      replaceTags(obj[key], sourceTag, destinyTag);
-    });
+  for (let i = 0; i < sourceTags.length; i++) {
+    destinationTags[i].textContent = sourceTags[i].textContent;
   }
-}
+});
 
-function process(xml) {
-  for (let mapping of config.tagMapping) {
-    replaceTags(xml, mapping.source, mapping.destiny);
-  }
+const serializer = new XMLSerializer();
+const outputXmlString = serializer.serializeToString(modelXmlDoc);
 
-  return xml;
-}
-
-function printXml(xml) {
-  const builder = new xml2js.Builder();
-  const updatedXML = builder.buildObject(xml);
-  console.log(updatedXML);
-}
-
-function load(transformedXmlFile) {
-  const folderPath = path.join(
-    __dirname,
-    "../xml/transformed",
-    "processed.xml"
-  );
-
-  const builder = new xml2js.Builder();
-  const updatedXML = builder.buildObject(transformedXmlFile);
-
-  fs.writeFile(folderPath, updatedXML, (err) => {
-    if (err) {
-      console.error("An error occurred when saving XML file:", err);
-      return;
-    }
-  });
-}
-
-(async () => {
-  const filePath = path.join(__dirname, "../xml", "exemplo.xml");
-
-  try {
-    const xmlFile = await extract(filePath);
-
-    const transformedXmlFile = process(xmlFile);
-
-    printXml(transformedXmlFile);
-
-    load(transformedXmlFile);
-  } catch (err) {
-    console.error(err);
-  }
-})();
+const destinationPath = path.join(
+  __dirname,
+  "..",
+  "xml",
+  "transformed",
+  `${preffix}_transformada.xml`
+);
+fs.writeFileSync(destinationPath, outputXmlString);

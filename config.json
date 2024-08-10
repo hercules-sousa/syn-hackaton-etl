@@ -3,6 +3,10 @@
     {
       "source": "FISCAL_DOC_KEY",
       "destination": "SistemaOrigem"
+    },
+    {
+      "source": "REQUEST_TYPE",
+      "destination": "ChaveOrigem"
     }
   ]
 }

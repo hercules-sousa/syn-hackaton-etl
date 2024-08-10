@@ -1,6 +1,6 @@
 <SynchroId xmlns="http://www.synchro.com.br/nfe" xsi:schemaLocation="http://www.synchro.com.br/nfe SynNFSePedidoEnvioRPS_V01.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <SistemaOrigem>292407075949780544215500A0000220831832366440</SistemaOrigem>
-    <ChaveOrigem/>
+    <ChaveOrigem>FISCAL_DOC_STATUS</ChaveOrigem>
     <CodIBGEMun/>
     <CpfCnpjPrestador/>
 </SynchroId>
