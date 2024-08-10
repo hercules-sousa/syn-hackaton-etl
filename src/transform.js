@@ -1,5 +1,7 @@
 const { DOMParser, XMLSerializer } = require("xmldom");
 
+const config = require("../config.json");
+
 const inputXmlString = `
 <ROOT>
     <ITEMX>
@@ -23,15 +25,6 @@ const modelXmlString = `
         <name></name>
     </itemX>
 </root>`;
-
-const config = {
-  tagMapping: [
-    {
-      source: "ID",
-      destination: "id",
-    },
-  ],
-};
 
 const parser = new DOMParser();
 const inputXmlDoc = parser.parseFromString(inputXmlString, "text/xml");
