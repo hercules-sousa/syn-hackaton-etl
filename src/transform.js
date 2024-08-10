@@ -1,7 +1,6 @@
-const fs = require("fs");
-const xml2js = require("xml2js");
+const { DOMParser, XMLSerializer } = require("xmldom");
 
-const inputXml = `
+const inputXmlString = `
 <ROOT>
     <ITEMX>
         <ID>1</ID>
@@ -11,8 +10,7 @@ const inputXml = `
         <ID>2</ID>
         <NAME>ITEM 2</NAME>
     </ITEMX>
-</ROOT>
-`;
+</ROOT>`;
 
 const modelXmlString = `
 <root>
@@ -24,8 +22,7 @@ const modelXmlString = `
         <id></id>
         <name></name>
     </itemX>
-</root>
-`;
+</root>`;
 
 const config = {
   tagMapping: [
@@ -33,42 +30,23 @@ const config = {
       source: "ID",
       destination: "id",
     },
-    {
-      source: "NAME",
-      destination: "name",
-    },
   ],
 };
 
-// Parser para XML -> JS
-const parser = new xml2js.Parser({ explicitArray: false });
-const builder = new xml2js.Builder();
+const parser = new DOMParser();
+const inputXmlDoc = parser.parseFromString(inputXmlString, "text/xml");
+const modelXmlDoc = parser.parseFromString(modelXmlString, "text/xml");
 
-// Função para aplicar o mapeamento
-function mapXmlValues(inputObj, modelObj, config) {
-  const items = inputObj.ROOT.ITEMX;
-  const modelItems = modelObj.root.itemX;
+config.tagMapping.forEach((mapping) => {
+  const sourceTags = inputXmlDoc.getElementsByTagName(mapping.source);
+  const destinationTags = modelXmlDoc.getElementsByTagName(mapping.destination);
 
-  items.forEach((item, index) => {
-    config.tagMapping.forEach((mapping) => {
-      modelItems[index][mapping.destination] = item[mapping.source];
-    });
-  });
-}
-
-parser.parseString(inputXml, (err, inputObj) => {
-  if (err) throw err;
-
-  parser.parseString(modelXmlString, (err, modelObj) => {
-    if (err) throw err;
-
-    mapXmlValues(inputObj, modelObj, config);
-
-    const resultXmlString = builder.buildObject(modelObj);
-
-    console.log(resultXmlString);
-
-    // Opcional: Salva o resultado em um arquivo
-    // fs.writeFileSync("output.xml", resultXmlString);
-  });
+  for (let i = 0; i < sourceTags.length; i++) {
+    destinationTags[i].textContent = sourceTags[i].textContent;
+  }
 });
+
+const serializer = new XMLSerializer();
+const outputXmlString = serializer.serializeToString(modelXmlDoc);
+
+console.log(outputXmlString);
