@@ -3,6 +3,10 @@
     {
       "source": "ID",
       "destination": "id"
+    },
+    {
+      "source": "NAME",
+      "destination": "name"
     }
   ]
 }

@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <root>
-  <itemX>
-    <id>1</id>
-    <name>ITEM 1</name>
-  </itemX>
-  <itemX>
-    <id>2</id>
-    <name>ITEM 2</name>
-  </itemX>
+    <itemX>
+        <id>1</id>
+        <name>ITEM 1</name>
+    </itemX>
+    <itemX>
+        <id>2</id>
+        <name>ITEM 2</name>
+    </itemX>
 </root>

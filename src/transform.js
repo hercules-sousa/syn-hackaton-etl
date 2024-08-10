@@ -1,34 +1,24 @@
+const fs = require("fs");
+const path = require("path");
 const { DOMParser, XMLSerializer } = require("xmldom");
 
 const config = require("../config.json");
 
-const inputXmlString = `
-<ROOT>
-    <ITEMX>
-        <ID>1</ID>
-        <NAME>ITEM 1</NAME>
-    </ITEMX>
-    <ITEMX>
-        <ID>2</ID>
-        <NAME>ITEM 2</NAME>
-    </ITEMX>
-</ROOT>`;
+const inputXmlPath = path.join(__dirname, "..", "xml", "exemplo.xml");
+const input = fs.readFileSync(inputXmlPath, "utf8");
 
-const modelXmlString = `
-<root>
-    <itemX>
-        <id></id>
-        <name></name>
-    </itemX>
-    <itemX>
-        <id></id>
-        <name></name>
-    </itemX>
-</root>`;
+const modelXmlPath = path.join(
+  __dirname,
+  "..",
+  "xml",
+  "model",
+  "exemplo_modelo.xml"
+);
+const model = fs.readFileSync(modelXmlPath, "utf8");
 
 const parser = new DOMParser();
-const inputXmlDoc = parser.parseFromString(inputXmlString, "text/xml");
-const modelXmlDoc = parser.parseFromString(modelXmlString, "text/xml");
+const inputXmlDoc = parser.parseFromString(input, "text/xml");
+const modelXmlDoc = parser.parseFromString(model, "text/xml");
 
 config.tagMapping.forEach((mapping) => {
   const sourceTags = inputXmlDoc.getElementsByTagName(mapping.source);
@@ -43,3 +33,12 @@ const serializer = new XMLSerializer();
 const outputXmlString = serializer.serializeToString(modelXmlDoc);
 
 console.log(outputXmlString);
+
+const destinationPath = path.join(
+  __dirname,
+  "..",
+  "xml",
+  "transformed",
+  "processed.xml"
+);
+fs.writeFileSync(destinationPath, outputXmlString);
