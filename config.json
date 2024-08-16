@@ -8,5 +8,36 @@
       "source": "REQUEST_TYPE",
       "destination": "ChaveOrigem"
     }
+  ],
+  "tagConcat": [
+    {
+      "source": [
+        "FIRST_PARTY_ADDRESS1",
+        "FIRST_PARTY_ADDRESS2",
+        "FIRST_PARTY_ADDRESS3",
+        "FIRST_PARTY_ADDRESS4",
+        "CEP",
+        "FIRST_PARTY_ZIP_CODE"
+      ],
+      "destination": "EnderecoPrestador"
+    }
+  ],
+  "tagCondicion": [
+    {
+      "destination": "StatusRPS",
+      "condicionIgualdadeValor": [
+        ["REQUEST_TYPE", "FISCAL_DOF_STATUS", "N"],
+        ["REQUEST_TYPE", "CANCELLATION", "C"],
+        ["REQUEST_TYPE", "VOID", "E"]
+      ]
+    }
+  ],
+  "tagDiferenca": [
+    {
+      "destination": "Logradouro",
+      "condicionDiferenca": ["SHIP_TO_PARTY_SITE_COUNTRY", "BR"],
+      "valueIfTrue": ["SHIP_TO_PARTY_SITE_ADDRESS1"],
+      "valueIfFalse": ["BILL_TO_PARTY_SITE_ADDRESS1"]
+    }
   ]
 }
