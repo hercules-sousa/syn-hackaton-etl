@@ -1,6 +1,10 @@
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xml" indent="yes" />
 
+  <xsl:variable name="docHeader" select="//FISCAL_DOC_HEADER" />
+  <xsl:variable name="docLines" select="$docHeader/FISCAL_DOC_LINES" />
+  <xsl:variable name="lastCategoryCode" select="$docLines/OTHER_PRODUCT_CLASSIFICATIONS[last()]/CATEGORY_CODE" />
+
   <xsl:template match="/">
     <RPS>
       <ChaveRPS>
@@ -77,7 +81,7 @@
 
       <ValorServicos>
         <xsl:value-of
-          select="format-number(number(//FISCAL_DOC_LINES/TRX_LINE_QUANTITY) * number(//FISCAL_DOC_LINES/UNIT_PRICE), '0.00')" />
+          select="format-number(number($docLines/TRX_LINE_QUANTITY) * number($docLines/UNIT_PRICE), '0.00')" />
       </ValorServicos>
 
       <ValorDeducoes>0</ValorDeducoes>
@@ -85,11 +89,11 @@
       <ValorPIS>
         <xsl:choose>
           <xsl:when
-            test="//FISCAL_DOC_HEADER//FISCAL_DOC_LINES//TAX_LINES[contains(TAX, 'PIS') and REGIME_TYPE_FLAG='W']">
+            test="$docLines//TAX_LINES[contains(TAX, 'PIS') and REGIME_TYPE_FLAG='W']">
             <xsl:value-of select="//TAX_RATE" />
           </xsl:when>
           <xsl:when
-            test="//FISCAL_DOC_HEADER//FISCAL_DOC_LINES//TAX_LINES[contains(TAX, 'PIS') and REGIME_TYPE_FLAG='I' and TAX_REPORTING_CODES[REPORTING_TYPE_CODE='LACLS_BR_WHT_TYPE'and REP_CODE_TAX='WH']]">
+            test="$docLines//TAX_LINES[contains(TAX, 'PIS') and REGIME_TYPE_FLAG='I' and TAX_REPORTING_CODES[REPORTING_TYPE_CODE='LACLS_BR_WHT_TYPE'and REP_CODE_TAX='WH']]">
             <xsl:value-of select="//TAX_RATE" />
           </xsl:when>
           <xsl:otherwise>
@@ -101,11 +105,11 @@
       <ValorCOFINS>
         <xsl:choose>
           <xsl:when
-            test="//FISCAL_DOC_HEADER//FISCAL_DOC_LINES//TAX_LINES[contains(TAX, 'COFINS') and REGIME_TYPE_FLAG='W']">
+            test="$docLines//TAX_LINES[contains(TAX, 'COFINS') and REGIME_TYPE_FLAG='W']">
             <xsl:value-of select="//TAX_RATE" />
           </xsl:when>
           <xsl:when
-            test="//FISCAL_DOC_HEADER//FISCAL_DOC_LINES//TAX_LINES[contains(TAX, 'COFINS') and REGIME_TYPE_FLAG='I' and TAX_REPORTING_CODES[REPORTING_TYPE_CODE='LACLS_BR_WHT_TYPE' and REP_CODE_TAX='WH']]">
+            test="$docLines//TAX_LINES[contains(TAX, 'COFINS') and REGIME_TYPE_FLAG='I' and TAX_REPORTING_CODES[REPORTING_TYPE_CODE='LACLS_BR_WHT_TYPE' and REP_CODE_TAX='WH']]">
             <xsl:value-of select="//TAX_RATE" />
           </xsl:when>
           <xsl:otherwise>
@@ -119,9 +123,9 @@
           select="substring-before(substring-after(substring-after(//OTHER_PRODUCT_CLASSIFICATIONS[last()]/CATEGORY_CODE, '|'), '|'), '|')" />
       </CodigoServico>
 
-      <xsl:if test="//FISCAL_DOC_LINES/PRODUCT_DESCRIPTION">
+      <xsl:if test="$docLines/PRODUCT_DESCRIPTION">
         <DescricaoCodServico>
-          <xsl:value-of select="//FISCAL_DOC_LINES/PRODUCT_DESCRIPTION" />
+          <xsl:value-of select="$docLines/PRODUCT_DESCRIPTION" />
         </DescricaoCodServico>
       </xsl:if>
 
@@ -131,7 +135,7 @@
       </CodigoCnae>
 
       <xsl:for-each
-        select="//FISCAL_DOC_HEADER//FISCAL_DOC_LINES//TAX_LINES[contains(TAX, 'ISS')]">
+        select="$docLines//TAX_LINES[contains(TAX, 'ISS')]">
         <xsl:choose>
           <xsl:when test="REGIME_TYPE_FLAG='W'">
             <AliquotaServicos>
@@ -185,9 +189,9 @@
         </xsl:choose>
       </xsl:for-each>
 
-      <xsl:if test="//FISCAL_DOC_LINES/LINE_AMT">
+      <xsl:if test="$docLines/LINE_AMT">
         <BaseCalculo>
-          <xsl:value-of select="format-number(number(//FISCAL_DOC_LINES/LINE_AMT), '0.00')" />
+          <xsl:value-of select="format-number(number($docLines/LINE_AMT), '0.00')" />
         </BaseCalculo>
       </xsl:if>
 
@@ -227,73 +231,73 @@
         </TipoLogradouro>
 
         <xsl:choose>
-          <xsl:when test="FISCAL_DOC_HEADER/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
+          <xsl:when test="$docHeader/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
             <Logradouro>
-              <xsl:value-of select="FISCAL_DOC_HEADER/SHIP_TO_PARTY_SITE_ADDRESS1" />
+              <xsl:value-of select="$docHeader/SHIP_TO_PARTY_SITE_ADDRESS1" />
             </Logradouro>
           </xsl:when>
           <xsl:otherwise>
             <Logradouro>
-              <xsl:value-of select="FISCAL_DOC_HEADER/BILL_TO_PARTY_SITE_ADDRESS1" />
+              <xsl:value-of select="$docHeader/BILL_TO_PARTY_SITE_ADDRESS1" />
             </Logradouro>
           </xsl:otherwise>
         </xsl:choose>
 
         <xsl:choose>
-          <xsl:when test="FISCAL_DOC_HEADER/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
+          <xsl:when test="$docHeader/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
             <NumeroEndereco>
-              <xsl:value-of select="FISCAL_DOC_HEADER/SHIP_TO_PARTY_SITE_ADDRESS2" />
+              <xsl:value-of select="$docHeader/SHIP_TO_PARTY_SITE_ADDRESS2" />
             </NumeroEndereco>
           </xsl:when>
           <xsl:otherwise>
             <NumeroEndereco>
-              <xsl:value-of select="FISCAL_DOC_HEADER/BILL_TO_PARTY_SITE_ADDRESS2" />
+              <xsl:value-of select="$docHeader/BILL_TO_PARTY_SITE_ADDRESS2" />
             </NumeroEndereco>
           </xsl:otherwise>
         </xsl:choose>
 
         <xsl:choose>
-          <xsl:when test="FISCAL_DOC_HEADER/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
+          <xsl:when test="$docHeader/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
             <Bairro>
-              <xsl:value-of select="FISCAL_DOC_HEADER/SHIP_TO_PARTY_SITE_ADDRESS4" />
+              <xsl:value-of select="$docHeader/SHIP_TO_PARTY_SITE_ADDRESS4" />
             </Bairro>
           </xsl:when>
           <xsl:otherwise>
             <Bairro>
-              <xsl:value-of select="FISCAL_DOC_HEADER/BILL_TO_PARTY_SITE_ADDRESS4" />
+              <xsl:value-of select="$docHeader/BILL_TO_PARTY_SITE_ADDRESS4" />
             </Bairro>
           </xsl:otherwise>
         </xsl:choose>
 
         <xsl:choose>
-          <xsl:when test="FISCAL_DOC_HEADER/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
+          <xsl:when test="$docHeader/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
             <Cidade>
-              <xsl:value-of select="FISCAL_DOC_HEADER/SHIP_TO_PARTY_SITE_CITY_CODE" />
+              <xsl:value-of select="$docHeader/SHIP_TO_PARTY_SITE_CITY_CODE" />
             </Cidade>
           </xsl:when>
           <xsl:otherwise>
             <Cidade>
-              <xsl:value-of select="FISCAL_DOC_HEADER/BILL_TO_PARTY_SITE_CITY_CODE" />
+              <xsl:value-of select="$docHeader/BILL_TO_PARTY_SITE_CITY_CODE" />
             </Cidade>
           </xsl:otherwise>
         </xsl:choose>
 
         <xsl:choose>
-          <xsl:when test="FISCAL_DOC_HEADER/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
+          <xsl:when test="$docHeader/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
             <CidadeTomadorDescricao>
-              <xsl:value-of select="FISCAL_DOC_HEADER/SHIP_TO_PARTY_SITE_CITY" />
+              <xsl:value-of select="$docHeader/SHIP_TO_PARTY_SITE_CITY" />
             </CidadeTomadorDescricao>
           </xsl:when>
           <xsl:otherwise>
             <CidadeTomadorDescricao>
-              <xsl:value-of select="FISCAL_DOC_HEADER/BILL_TO_PARTY_SITE_CITY" />
+              <xsl:value-of select="$docHeader/BILL_TO_PARTY_SITE_CITY" />
             </CidadeTomadorDescricao>
           </xsl:otherwise>
         </xsl:choose>
 
         <xsl:if test="//BILL_TO_PARTY_SITE_STATE">
           <xsl:choose>
-            <xsl:when test="FISCAL_DOC_HEADER/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
+            <xsl:when test="$docHeader/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
               <UF>
                 <xsl:text>EX</xsl:text>
               </UF>
@@ -307,22 +311,22 @@
         </xsl:if>
 
         <xsl:choose>
-          <xsl:when test="FISCAL_DOC_HEADER/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
+          <xsl:when test="$docHeader/SHIP_TO_PARTY_SITE_COUNTRY != 'BR'">
             <Pais>
-              <xsl:value-of select="FISCAL_DOC_HEADER/SHIP_TO_PARTY_SITE_COUNTRY" />
+              <xsl:value-of select="$docHeader/SHIP_TO_PARTY_SITE_COUNTRY" />
             </Pais>
           </xsl:when>
           <xsl:otherwise>
             <Pais>
-              <xsl:value-of select="FISCAL_DOC_HEADER/BILL_TO_PARTY_SITE_COUNTRY" />
+              <xsl:value-of select="$docHeader/BILL_TO_PARTY_SITE_COUNTRY" />
             </Pais>
           </xsl:otherwise>
         </xsl:choose>
       </EnderecoTomador>
 
-      <xsl:if test="//FISCAL_DOC_LINES/PRODUCT_DESCRIPTION">
+      <xsl:if test="$docLines/PRODUCT_DESCRIPTION">
         <Descricao>
-          <xsl:value-of select="//FISCAL_DOC_LINES/PRODUCT_DESCRIPTION" />
+          <xsl:value-of select="$docLines/PRODUCT_DESCRIPTION" />
         </Descricao>
       </xsl:if>
     </RPS>
