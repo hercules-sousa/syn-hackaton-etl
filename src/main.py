@@ -18,48 +18,34 @@ def extract_encoding(xml_string):
     else:
         return 'UTF-8'
 
+requests.post('{}/xml-files/reset'.format(os.getenv('BASE_URL')))
 
-parser = etree.XMLParser(recover=True)
-xml_tree = etree.parse(open('xml/XML_ORACLE_CLOUD.xml'), parser)
-xslt_tree = etree.parse('template.xsl')
-transform = etree.XSLT(xslt_tree)
+for _ in range(12):
+    body = {'id': '', 'nfs': []}
+    response = requests.get('{}/xml-files'.format(os.getenv('BASE_URL')))
+    body['id'] = response.json()['id']
+    xml_files = response.json()['content']
+    xml_encoding = extract_encoding(xml_files)
+    parser = etree.XMLParser(recover=True)
+    xml_tree = etree.parse(io.BytesIO(xml_files.encode(xml_encoding)))
+    xslt_tree = etree.parse('template.xsl')
+    transform = etree.XSLT(xslt_tree)
 
-root = xml_tree.getroot()
+    root = xml_tree.getroot()
 
-if root.tag == 'FISCAL_DOC_HEADER':
-    fiscal_docs = [root]
+    if root.tag == 'FISCAL_DOC_HEADER':
+        fiscal_docs = [root]
+    else:
+        fiscal_docs = root.findall('FISCAL_DOC_HEADER')
 
-for index, fiscal_doc in enumerate(fiscal_docs):
-    new_tree = etree.ElementTree(fiscal_doc)
-    transformed_tree = transform(new_tree)
+    for index, fiscal_doc in enumerate(fiscal_docs):
+        new_tree = etree.ElementTree(fiscal_doc)
+        transformed_tree = transform(new_tree)
 
-    output_file = 'out/transformed_{}.xml'.format(index)
-    with open(output_file, 'wb') as f:
-        f.write(etree.tostring(transformed_tree, pretty_print=True, xml_declaration=True))
+        body['nfs'].append(etree.tostring(transformed_tree))
 
-# for _ in range(12):
-#     response = requests.get('{}/xml-files'.format(os.getenv('BASE_URL')))
-#     xml_id = response.json()['id']
-#     xml_files = response.json()['content']
-#     xml_encoding = extract_encoding(xml_files)
-#     parser = etree.XMLParser(recover=True)
-#     xml_tree = etree.parse(io.BytesIO(xml_files.encode(xml_encoding)))
-#     xslt_tree = etree.parse('template.xsl')
-#     transform = etree.XSLT(xslt_tree)
+    post_res = requests.post('{}/xml-files'.format(os.getenv('BASE_URL')), data=body)
+    print(post_res.json())
 
-#     root = xml_tree.getroot()
-
-#     if root.tag == 'FISCAL_DOC_HEADER':
-#         fiscal_docs = [root]
-#     else:
-#         fiscal_docs = root.findall('FISCAL_DOC_HEADER')
-
-#     for index, fiscal_doc in enumerate(fiscal_docs):
-#         new_tree = etree.ElementTree(fiscal_doc)
-#         transformed_tree = transform(new_tree)
-
-#         output_file = 'out/transformed_{}_{}.xml'.format(xml_id, index)
-#         with open(output_file, 'wb') as f:
-#             f.write(etree.tostring(transformed_tree, pretty_print=True, xml_declaration=True))
-
-#     requests.post('{}/xml-files/reset'.format(os.getenv('BASE_URL')))
+time_response = requests.get('{}/xml-files/time'.format(os.getenv('BASE_URL')))
+print(time_response.content)
