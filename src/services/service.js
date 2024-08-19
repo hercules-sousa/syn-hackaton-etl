@@ -1,6 +1,6 @@
 import api from '../services/api'
 
-const ENDPOINT_BASE = 'teste'
+const ENDPOINT_BASE = 'transformaXml'
 
 export function getDados() {
   api.get(ENDPOINT_BASE)
@@ -11,14 +11,18 @@ export function getDados() {
 }
 
 export async function postDados(data) {
-  const response = await api.post(ENDPOINT_BASE, data);
+  const response = await api.post(ENDPOINT_BASE, data, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 }
 
 export async function postDados2(data) {
   try {
-    const response = await axios.post(ENDPOINT_BASE, data, {
+    const response = await api.post(ENDPOINT_BASE, data, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': 'application/json',
       },
     });
     console.log('Resposta do servidor:', response.data);

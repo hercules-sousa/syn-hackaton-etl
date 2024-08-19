@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getDados, postDados, deleteDados, updateDados } from './services/service';
+import { getDados, postDados2, deleteDados, updateDados } from './services/service';
 import { tagsDestino} from './constantes'
 import styles from './App.module.css'
 
@@ -46,7 +46,7 @@ function App() {
       return array;
     }, {})
     
-    postDados(data);
+    postDados2(data);
     
     console.log(data); // Substitua isso pelo código de envio ao backend
     // Exemplo de envio ao backend:
