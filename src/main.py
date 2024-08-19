@@ -18,7 +18,9 @@ def extract_encoding(xml_string):
     else:
         return 'UTF-8'
 
-requests.post('{}/xml-files/reset'.format(os.getenv('BASE_URL')))
+
+reset_res = requests.post('{}/xml-files/reset'.format(os.getenv('BASE_URL')))
+print(reset_res.content)
 
 for _ in range(12):
     body = {'id': '', 'nfs': []}
@@ -42,10 +44,12 @@ for _ in range(12):
         new_tree = etree.ElementTree(fiscal_doc)
         transformed_tree = transform(new_tree)
 
-        body['nfs'].append(etree.tostring(transformed_tree))
+        body['nfs'].append(etree.tostring(
+            transformed_tree).decode(xml_encoding))
 
-    post_res = requests.post('{}/xml-files'.format(os.getenv('BASE_URL')), data=body)
-    print(post_res.json())
+    post_res = requests.post(
+        '{}/xml-files'.format(os.getenv('BASE_URL')), json=body)
+    print(post_res.content)
 
 time_response = requests.get('{}/xml-files/time'.format(os.getenv('BASE_URL')))
 print(time_response.content)
