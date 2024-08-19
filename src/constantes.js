@@ -1,0 +1,1 @@
+export const tagsDestino = ['CodigoPaisServico', 'ExigibilidadeISS', 'Competencia', 'IncentivoFiscal']
