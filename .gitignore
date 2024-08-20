@@ -3,3 +3,4 @@ package-lock.json
 .venv
 .idea
 out/
+/target/*.xml

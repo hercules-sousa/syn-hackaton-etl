@@ -14,3 +14,4 @@ def transforma_xml():
         return jsonify({'status': 'sucesso', 'mensagem': 'Operação concluida com sucesso!'})
     except Exception as e:
         return jsonify({'status': 'falha', 'mensagem': 'Erro ao acessar os dados!'})
+#{'ayrton': {'isDate': False, 'isExpression': False, 'valor': '123'}}

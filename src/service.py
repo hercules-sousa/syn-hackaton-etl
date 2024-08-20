@@ -1,3 +1,4 @@
+import os
 from simpleeval import simple_eval
 from lxml import etree
 
@@ -33,7 +34,7 @@ def find_tag_value(root, tag_path):
 def tags_parametrizadas(root, dados):
     dic = {}
     for key, value in dados.items():
-        valor = value["value"]
+        valor = value["valor"]
         if value["isExpression"]:
             dic[key] = trata_exepressao(root, valor)
         else:
@@ -54,7 +55,7 @@ def funcao(dados):
     reset_res = gateway.reset_xml()
     print(reset_res.content)
 
-    for _ in range(12):
+    for i in range(12):
         body = {'id': '', 'nfs': []}
         response = gateway.get_xml()
         body['id'] = response.json()['id']
@@ -88,5 +89,8 @@ def funcao(dados):
 
             body['nfs'].append(etree.tostring(
                 transformed_tree).decode(xml_encoding))
-
+            os.makedirs('../target', exist_ok=True)
+            with open(f'../target/out{i}_{index}.xml', 'w') as f:
+                f.write(str(body['nfs'][index]))
         post_res = gateway.post_xml(body)
+        print(post_res.content, gateway.time_xml().content)
