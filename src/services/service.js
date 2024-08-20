@@ -11,14 +11,6 @@ export function getDados() {
 }
 
 export async function postDados(data) {
-  const response = await api.post(ENDPOINT_BASE, data, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-}
-
-export async function postDados2(data) {
   try {
     const response = await api.post(ENDPOINT_BASE, data, {
       headers: {

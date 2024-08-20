@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { getDados, postDados2, deleteDados, updateDados } from './services/service';
+import { getDados, postDados, deleteDados, updateDados } from './services/service';
 import { tagsDestino} from './constantes'
 import styles from './App.module.css'
+import Switch from '@mui/material/Switch'
+import { Button, Fab, FormControlLabel, TextField } from '@mui/material';
+import { AddAlarm, AddBox, AddIcCallOutlined } from '@mui/icons-material';
 
 function App() {
   const lista = tagsDestino; // Exemplo de lista
-  const [formData, setFormData] = useState(lista.map(item => ({ nome: item, valor: '', disabled: true })));
-  const [xmlFile, setXmlFile] = useState(null);
-
-  function handleFileChange(e) {
-    setXmlFile(e.target.files[0]);
-  };
+  const [formData, setFormData] = useState([{ nome: '', valor: '', isExpression: false, isDate: false }]);
 
   function handleInputNameChange(index, value) {
     const newFormData = [...formData];
@@ -24,12 +22,34 @@ function App() {
     setFormData(newFormData);
   };
 
+  function handleRadioIsExpressionChange(index) {
+    const newFormData = [...formData];
+    //console.log(event.target.checked);
+    newFormData[index].isExpression = event.target.checked;
+    newFormData[index].isDate = event.target.checked 
+      ? false
+      : newFormData[index].isDate;
+    setFormData(newFormData);
+  };
+
+  function handleRadioIsDateChange(index) {
+    const newFormData = [...formData];
+    //console.log(event.target.checked);
+    newFormData[index].isDate = event.target.checked;
+    newFormData[index].isExpression = event.target.checked 
+      ? false
+      : newFormData[index].isExpression;
+    setFormData(newFormData);
+  };
+
   function addInputs() {
-    setFormData([...formData, { nome: '', valor: '', disabled: false }]);
+    setFormData([...formData, { nome: '', valor: '', isExpression: false, isDate: false }]);
   };
 
   function handleSubmit() {
     event.preventDefault();
+    console.log(formData)
+    
 
     // if (!xmlFile) {
     //   alert('Por favor, selecione um arquivo XML.');
@@ -41,14 +61,14 @@ function App() {
     // data.append('list', [...formData].map(({disabled, ...resto}) => {return resto}))
     // data.append('file', xmlFile);
     
-    const data = [...formData].reduce((array, { nome, valor }) => {
-      array[nome] = valor;
+    const data = [...formData].reduce((array, { nome, valor, isExpression, isDate }) => {
+      array[nome] = {valor: valor, isExpression: isExpression, isDate: isDate};
       return array;
     }, {})
     
-    postDados2(data);
+    postDados(data);
     
-    console.log(data); // Substitua isso pelo código de envio ao backend
+    //console.log(data); // Substitua isso pelo código de envio ao backend
     // Exemplo de envio ao backend:
     // fetch('https://seu-backend.com/api', {
     //   method: 'POST',
@@ -56,31 +76,57 @@ function App() {
     //   body: JSON.stringify(formData)
     // });
   };
-
+  //console.log(formData)
   return (
     <>
       <header className={styles.header}>Bytes and Bugs Inc.</header>
       <form className={styles.container} onSubmit={handleSubmit}>
         {formData.map((item, index) => (
           <div key={index} className={styles.row}>
-            <input
-              className={styles.input}
+            <TextField 
+              id="nome"
+              color="secondary"
+              label="Nome" 
+              variant="outlined"
+              size="small"
               value={item.nome}
               onChange={(e) => handleInputNameChange(index, e.target.value)}
-              disabled={item.disabled}
-              placeholder="nome"
             />
-            <input
-              className={styles.input}
+            <TextField 
+              id="value"
+              color="secondary"
+              label={item.isDate ? '' : 'Valor'}
+              type={item.isDate ? 'date' : 'text'}
+              variant="outlined"
+              size="small"
               value={item.valor}
               onChange={(e) => handleInputValueChange(index, e.target.value)}
-              placeholder="valor"
             />
+            <FormControlLabel 
+              control={
+                <Switch
+                  checked={item.isExpression}
+                  onChange={(e) => {handleRadioIsExpressionChange(index)}}
+                  inputProps={{ 'aria-label': 'controlled' }}
+                  color="secondary"
+                />}   
+              label="É uma expressão?" />
+
+            <FormControlLabel 
+              control={
+                <Switch
+                  checked={item.isDate}
+                  onChange={(e) => {handleRadioIsDateChange(index)}}
+                  inputProps={{ 'aria-label': 'controlled' }}
+                  color="secondary"
+                />}   
+              label="É uma data?" />
           </div>
         ))}
-        <input type="file" accept=".xml" onChange={handleFileChange} />
-        <button type="button" className={styles.addButton} onClick={addInputs}>+</button>
-        <button type="submit" className={styles.submitButton}>Enviar</button>
+        <Fab color="secondary" aria-label="add" onClick={addInputs}>
+          <AddBox />
+        </Fab>
+        <Button type="submit" color="secondary" variant="contained">Converter XML</Button>
       </form>
     </>
   );
